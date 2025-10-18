@@ -8,6 +8,9 @@ data:
     global:
       scrape_interval: 15s
     scrape_configs:
-      - job_name: 'nginx'   # Identitifier
+      # - job_name: 'nginx'   # Identitifier
+      #   static_configs:
+      #     - targets: ['nginx-service.base-test.svc.cluster.local:80']  # The DNS name of the Nginx service inside the cluster - now nginx does not export metrics by default so we need node exporter
+      - job_name: 'node-exporter'
         static_configs:
-          - targets: ['nginx-service.base-test.svc.cluster.local:80']  #  # The DNS name of the Nginx service inside the cluster
+          - targets: ['node-exporter.monitoring.svc.cluster.local:9100']

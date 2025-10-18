@@ -13,23 +13,36 @@ spec:
     metadata:
       labels:
         app: node-exporter
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "9100"
     spec:
       hostPID: true
+      hostNetwork: true
       containers:
         - name: node-exporter
-          image: prom/node-exporter:latest
+          image: prom/node-exporter:v1.8.1
           ports:
-            - containerPort: 9100
-              name: metrics
+            - name: metrics
+              containerPort: 9100
           resources:
             limits:
+              memory: 200Mi
               cpu: 100m
-              memory: 128Mi
-            requests:
-              cpu: 50m
-              memory: 64Mi
           securityContext:
             privileged: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: node-exporter
+  namespace: monitoring
+  labels:
+    app: node-exporter
+spec:
+  selector:
+    app: node-exporter
+  ports:
+    - name: metrics
+      port: 9100
+      targetPort: 9100
+  clusterIP: None  # Makes this a "headless" service, one per node
+
+  # needs to be a service to be discovered by prometheus, cant just be a daemonset
