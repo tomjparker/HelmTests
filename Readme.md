@@ -79,3 +79,14 @@ On Azure (AKS cluster):
     - Grafana → Azure Disk
 3. External access: via Azure Application Gateway Ingress Controller
 4. Optional: integrate Grafana with Azure AD SSO
+
+
+# NB: Typically you wouldnt create the helm charts yourself, you would take from a Helm repository, this work is to merely connect the dots and understand fully the repercusions. 
+
+1. deployment.yaml: Defines how Pods are managed and replaced by the `Deployment` controller (e.g., replicas, rolling updates) | Optional for dev (I used static Pods here), Needed for prod     
+2. service.yaml: Exposes your Pods internally (ClusterIP) or externally (NodePort/LoadBalancer) | Needed for dev and prod
+3. configmap.yaml: Stores config files for Prometheus or app config | Needed for dev and prod
+4. serviceaccount.yaml:  Used for RBAC permissions so Pods can access the API or other resources securely | Optional for dev, needed in prod 
+5. hpa.yaml: Horizontal Pod Autoscaler — scales replicas based on CPU/memory | Unnecessary for dev, needed for prod
+6. ingress.yaml/httproute.yaml: Exposes HTTP traffic through a controller (Nginx, Application Gateway, ALB, etc.) | Optional for dev, needed in prod
+7. pvc.yaml/storage.yaml: Persistent storage for Grafana/Prometheus | Optional for dev, needed in prod
