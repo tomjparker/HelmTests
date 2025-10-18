@@ -23,5 +23,18 @@ kubectl apply -f nginx-svc.yaml
 
 kubectl get pods -n base-test
 
+kubectl port-forward -n monitoring svc/grafana 3000:80
+kubectl port-forward -n monitoring svc/prometheus-server 9090:80
 
 
+minikube service nginx-service -n base-test
+
+kubectl create namespace monitoring
+
+kubectl apply -f prometheus-config.yaml
+
+kubectl apply -f prometheus-pod.yaml
+kubectl get pods -n monitoring
+
+kubectl apply -f prometheus-svc.yaml
+minikube service prometheus-service -n monitoring --url
