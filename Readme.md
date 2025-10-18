@@ -9,12 +9,12 @@ sudo apt install -y conntrack
 
 Minikube + Prometheus + Grafana will run with 2 vCPUs and 5 GB Ram total (if this goes higher things may slow down and pods may be dropped)
 
+// Set personal computer limitations for virtual machines to use
 minikube config set cpus 2
 minikube config set memory 5120
 minikube config set driver docker
 
 minikube start
-
 kubectl create namespace base-test
 
 kubectl apply -f nginx-pod.yaml
@@ -23,8 +23,8 @@ kubectl apply -f nginx-svc.yaml
 
 kubectl get pods -n base-test
 
-kubectl port-forward -n monitoring svc/grafana 3000:80
-kubectl port-forward -n monitoring svc/prometheus-server 9090:80
+// kubectl port-forward -n monitoring svc/grafana 3000:80
+k// ubectl port-forward -n monitoring svc/prometheus-server 9090:80
 
 
 minikube service nginx-service -n base-test
@@ -38,3 +38,13 @@ kubectl get pods -n monitoring
 
 kubectl apply -f prometheus-svc.yaml
 minikube service prometheus-service -n monitoring --url
+
+kubectl apply -f grafana-pod.yaml
+
+minikube service grafana-service -n monitoring --url   // go to the url in browser
+
+// Will prompt you for new user and pass, just set
+admin1
+admin1
+
+add a connection -> data sources -> prometheus -> Url (http://prometheus-service.monitoring.svc.cluster.local:9090)
