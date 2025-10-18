@@ -90,3 +90,70 @@ On Azure (AKS cluster):
 5. hpa.yaml: Horizontal Pod Autoscaler — scales replicas based on CPU/memory | Unnecessary for dev, needed for prod
 6. ingress.yaml/httproute.yaml: Exposes HTTP traffic through a controller (Nginx, Application Gateway, ALB, etc.) | Optional for dev, needed in prod
 7. pvc.yaml/storage.yaml: Persistent storage for Grafana/Prometheus | Optional for dev, needed in prod
+
+# --- Taints --- #
+
+kubectl taint nodes minikube key=infra:NoSchedule   # Don’t schedule any pod on this node unless it tolerates the taint key=infra:NoSchedule
+
+# Sample toleration section (goes under spec in yaml):
+tolerations:
+    - key: "infra"
+      operator: "Equal"
+      value: "NoSchedule"
+      effect: "NoSchedule"
+
+kubectl taint nodes minikube key=infra:NoSchedule-  # To untaint
+
+# --- Selectors --- # 
+
+kubectl label nodes minikube node-type=frontend     # Basically implies - please only tun on nodes where they have this label
+
+# On a pod yaml itself
+spec: 
+    nodeSelector:
+        node-type: frontend
+
+
+# --- Affinity --- #
+
+# Sample affinity section
+spec:
+    affinity:
+        nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+                - key: node-type
+                    operator: In
+                    values:
+                    - backend
+
+# Only schedule on nodes labeled node-type=backend. If none exist, pod stays pending.
+
+spec:
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 50
+          preference:
+            matchExpressions:
+              - key: node-type
+                operator: In
+                values:
+                  - backend
+
+# Prefer backend nodes, but schedule elsewhere if needed.
+
+spec:
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - my-app
+          topologyKey: "kubernetes.io/hostname"
+
+# Don’t schedule two my-app pods on the same node - used in Deployments with multiple replicas for high availability.

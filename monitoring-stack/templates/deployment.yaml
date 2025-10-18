@@ -1,6 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  # Helm best practice: use include helpers for naming
+  # This ensures resources stay unique when the chart name changes or multiple releases are deployed.
   name: {{ include "monitoring-stack.fullname" . }}
   labels:
     {{- include "monitoring-stack.labels" . | nindent 4 }}
