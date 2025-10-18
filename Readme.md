@@ -47,4 +47,35 @@ minikube service grafana-service -n monitoring --url   // go to the url in brows
 admin1
 admin1
 
-add a connection -> data sources -> prometheus -> Url (http://prometheus-service.monitoring.svc.cluster.local:9090)
+add a connection -> data sources -> prometheus -> Url (http://prometheus-service.monitoring.svc.cluster.local:9090)   // These tunnels are temporary, and if you interrupt the tunnel stops
+
+minikube service grafana-service -n monitoring --url
+minikube service prometheus-service -n monitoring --url
+
+1860 for node exporter template
+
+node exporter runs as a daemonset, one per k8s node
+
+
+if you repush a change to a pod, it likely uses the old version of a config until it restarts so you may have to cleanup sometimes
+kubectl delete pod -n monitoring -l app=prometheus   // It should auto spin back up after from the replicasets
+kubectl logs prometheus -n monitoring | grep "Loaded configuration"
+
+typical cluster setups:
+On AWS (EKS cluster):
+
+1. Prometheus & Grafana deployed via Helm (kube-prometheus-stack)
+2. Persistent volumes:
+    - Prometheus → gp3 EBS volume
+    - Grafana → gp3 EBS volume
+
+3. Optional: Backup dashboards/configs to S3
+4. External access: via ALB Ingress Controller or AWS Load Balancer Service
+
+On Azure (AKS cluster):
+1. Prometheus & Grafana via Helm or Flux
+2. Persistent volumes:
+    - Prometheus → Azure Managed Disk
+    - Grafana → Azure Disk
+3. External access: via Azure Application Gateway Ingress Controller
+4. Optional: integrate Grafana with Azure AD SSO
